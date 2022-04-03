@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.sushi</groupId>
+  <artifactId>sushi</artifactId>
+  <version>source /Users/arielcheng/Documents/dev/projects/env/bin/activate</version>
+
+  <name>sushi</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-math3</artifactId>
+        <version>3.6.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>${basedir}/src</sourceDirectory>
+    <scriptSourceDirectory>${basedir}/src</scriptSourceDirectory>
+    <testSourceDirectory>${basedir}/src/</testSourceDirectory>
+    <outputDirectory>${basedir}/src/</outputDirectory>
+    <testOutputDirectory>${basedir}/src/</testOutputDirectory>
+  </build>
+</project>
