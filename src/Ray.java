@@ -9,4 +9,8 @@ public class Ray {
     this.origin = origin;
     this.direction = direction;
   }
+
+  public Vector3D at(double t) {
+    return origin.add(direction.scalarMultiply(t));
+  }
 }

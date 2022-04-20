@@ -1,31 +1,28 @@
-import java.util.ArrayList;
 import javax.swing.JFrame;
+import java.awt.*;
+import java.awt.Dimension;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-class Camera {
+// TO-DO: Rewrite camera class
+// HELP. ME.
 
-  public Vector3D position = new Vector3D(0, 0, 0);
+class Camera extends JFrame {
+
+  public Vector3D position = new Vector3D(0, 0, -2.00001);
+  public double focalDistance = 3.0;
+
   JFrame frame = new JFrame("sushi 3D");
-
-  public void setup() {
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-    frame.pack();
-    frame.setVisible(true);
-  }
-
-  public void render(ArrayList<Object> objects) {
-    setup();
-    for (int i = 0; i < objects.size(); i++) {
-      objects.get(i).render();
-    }
-  }
+  Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+  double width = screenSize.getWidth();
+  double height = screenSize.getHeight();
 
   public static void main(String[] args) {
     Camera camera = new Camera();
-    World world = new World();
-    world.addObject(new Sphere(new Vector3D(0, 0, 0)));
-    camera.render(world.objects);
+    World world = new World(camera.width, camera.height, camera.focalDistance, camera.position);
+    camera.frame.add(world);
+    world.addObject(new Sphere(1, new Vector3D(0, 0, -1)));
+    camera.frame.setVisible(true);
+    camera.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     System.out.println("Done.");
   }
 }

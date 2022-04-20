@@ -5,15 +5,11 @@ public class Object {
   public Vector3D position = new Vector3D(0, 0, 0);
   // TO-DO: rotation
   // TO-DO: material
+  // TO-DO: location/chunk in world (octree)
 
   Object(Vector3D point) {
     position = point;
   }
 
-  public boolean hitSurface() {
-    return false;
-  }
-
-  public void render() {}
-  
+  public boolean objectIsHit(Ray ray) { return false; }
 }
