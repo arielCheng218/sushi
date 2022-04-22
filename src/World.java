@@ -37,7 +37,8 @@ public class World extends JPanel {
       for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
           count2++;
-          Ray ray = new Ray(this.cameraPosition, new Vector3D(i, j, focalDistance)); // Ray from camera to plane
+          Vector3D rayDirection = this.cameraPosition.subtract(new Vector3D(i, j, focalDistance));
+          Ray ray = new Ray(this.cameraPosition, rayDirection); // Ray from camera to plane
           if (obj.objectIsHit(ray)) {
             count1++;
             g.drawLine(i, j, i, j);
