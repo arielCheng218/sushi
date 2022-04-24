@@ -11,5 +11,5 @@ public class Object {
     position = point;
   }
 
-  public boolean objectIsHit(Ray ray) { return false; }
+  public double objectIsHit(Ray ray) { return -1.0; }
 }

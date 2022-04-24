@@ -26,27 +26,32 @@ public class World extends JPanel {
   }
 
   public void paintComponent(Graphics g) {
-    int count1 = 0;
-    int count2 = 0;
     super.paintComponent(g);
     this.setBackground(Color.BLACK);
     System.out.println("Drawing...");
-    g.setColor(Color.CYAN);
+    DirectionLight light = new DirectionLight(new Vector3D(0, 3, 0));
     for (Object obj : objects) {
       System.out.println("Rendering " + obj + "...");
       for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-          count2++;
           Vector3D rayDirection = this.cameraPosition.subtract(new Vector3D(i, j, focalDistance));
-          Ray ray = new Ray(this.cameraPosition, rayDirection); // Ray from camera to plane
-          if (obj.objectIsHit(ray)) {
-            count1++;
+          Ray ray = new Ray(this.cameraPosition, rayDirection);
+          double t = obj.objectIsHit(ray);
+          if (t > 0) {
+            // if ray from camera intersects object, color pixel
+            Vector3D normal = (ray.at(t).subtract(obj.position)).normalize();
+            double coeff = light.direction.dotProduct(normal);
+            coeff = (255*((coeff / 2.0) + 0.5));
+            g.setColor(new Color(255, 0, 0, (int)coeff));
+            g.drawLine(i, j, i, j);
+          } else {
+            // else treat as background
+            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * (j / this.height))));
             g.drawLine(i, j, i, j);
           }
         }
       }
     }
-    System.out.println(count1 + "/" + count2);
     System.out.println("Finished drawing.");
   }
 }
