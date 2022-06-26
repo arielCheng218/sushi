@@ -5,6 +5,9 @@ import javax.swing.KeyStroke;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.time.Duration;
+import java.time.Instant;
 import java.awt.event.MouseMotionListener;
 import java.awt.*;
 
@@ -23,24 +26,35 @@ class Camera extends JPanel implements MouseMotionListener {
   
   private double speed = 20.0;
   private PointerInfo lastMousePosition;
+  Duration deltaTime;
 
-  public Vector3D position = new Vector3D(400+(width / 2.0), height / 2.0, -600);
+  public Vector3D position = new Vector3D(width / 2.0, height / 2.0, -600);
+  public double thetaZ = 0;
+  public double thetaY = 0;
   public double focalDistance = 900.0;
 
   public void setup() {
+    this.frame.setCursor(this.frame.getToolkit().createCustomCursor(new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "null"));
+    System.setProperty("apple.awt.fullscreenhidecursor","true");
     this.frame.setVisible(true);
     this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
     this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     System.out.println("Done.");
   }
 
+  public void loop() {
+    while (WHEN_IN_FOCUSED_WINDOW != 0) {
+      this.deltaTime = Duration.ZERO;
+      Instant beginTime = Instant.now();
+      this.frame.repaint();
+      deltaTime = Duration.between(beginTime, Instant.now());
+    }
+  }
+
   public static void main(String[] args) {
     Camera camera = new Camera();
     camera.world = new World(camera);
     camera.frame.add(camera.world);
-
-    System.out.println(camera.height);
-    System.out.println(camera.width);
 
     // listen for mouse events and key presses
     camera.frame.addMouseMotionListener(camera);
@@ -56,21 +70,22 @@ class Camera extends JPanel implements MouseMotionListener {
     camera.world.addObject(sphere);
 
     camera.setup();
-  }
 
-  @Override
-  protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    world.repaint();
+    // game loop
+    camera.loop();
   }
 
   public void mouseDragged(MouseEvent event) {}
 
   public void mouseMoved(MouseEvent event) {
-    // TODO rotate camera
     System.out.println("Mouse movement: " + event.getX()+ "," + event.getY() + ".");
-    // Rotate camera somehow
-    // frame.repaint();
+    double deltaX = this.lastMousePosition.getLocation().getX() - event.getX();
+    double deltaY = this.lastMousePosition.getLocation().getY() - event.getY();
+    thetaZ += deltaX / this.focalDistance;
+    thetaY += deltaY / this.focalDistance;
+    System.out.println(thetaZ);
+    System.out.println(thetaY);
+    lastMousePosition = MouseInfo.getPointerInfo();
   }
 
   public void setupKeyBindings(World world, Camera camera) {
@@ -96,7 +111,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(2, speed, camera.position);
+      camera.position = incVectorValue(2, speed*(1+camera.deltaTime.toMillis()), camera.position);
       camera.frame.repaint();
     }
   }
@@ -108,7 +123,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(2, -speed, camera.position);
+      camera.position = incVectorValue(2, -speed*(1+camera.deltaTime.toMillis()), camera.position);
       camera.frame.repaint();
     }
   }
@@ -120,8 +135,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      System.out.println(camera.position);
-      camera.position = incVectorValue(0, -speed, camera.position);
+      camera.position = incVectorValue(0, -speed*(1+camera.deltaTime.toMillis()), camera.position);
       camera.frame.repaint();
     }
   }
@@ -133,7 +147,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(0, speed, camera.position);
+      camera.position = incVectorValue(0, speed*(1+camera.deltaTime.toMillis()), camera.position);
       camera.frame.repaint();
     }
   }
