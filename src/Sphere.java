@@ -9,11 +9,12 @@ public class Sphere extends Object {
     this.radius = radius;
   }
 
+  @Override
   public double objectIsHit(Ray ray) {
-    Vector3D oc = ray.origin.subtract(this.position);
+    Vector3D oc = position.subtract(ray.origin);
     double a = Vector3D.dotProduct(ray.direction, ray.direction);
     double b = 2.0 * Vector3D.dotProduct(oc, ray.direction);
-    double c = Vector3D.dotProduct(oc, oc) - this.radius * this.radius;
+    double c = Vector3D.dotProduct(oc, oc) - this.radius*this.radius;
     double discriminant = b*b - 4*a*c;
     if (discriminant < 0) { return -1.0; }
     return (-b - Math.sqrt(discriminant)) / (2.0*a);

@@ -9,16 +9,11 @@ public class World extends JPanel {
 
   public ArrayList<Object> objects = new ArrayList<Object>();
   public int time;
-  private double width;
-  private double height;
   private double focalDistance;
-  private Vector3D cameraPosition;
+  private Camera camera;
 
-  World(double width, double height, double focalDistance, Vector3D cameraPosition) {
-    this.width = width;
-    this.height = height;
-    this.focalDistance = focalDistance;
-    this.cameraPosition = cameraPosition;
+  World(Camera camera) {
+    this.camera = camera;
   }
 
   public void addObject(Object obj) {
@@ -29,24 +24,27 @@ public class World extends JPanel {
     super.paintComponent(g);
     this.setBackground(Color.BLACK);
     System.out.println("Drawing...");
-    DirectionLight light = new DirectionLight(new Vector3D(0, 3, 0));
+    Vector3D lightPosition = new Vector3D(1, 1, -1);
+    DirectionLight light = new DirectionLight(lightPosition);
     for (Object obj : objects) {
       System.out.println("Rendering " + obj + "...");
-      for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-          Vector3D rayDirection = this.cameraPosition.subtract(new Vector3D(i, j, focalDistance));
-          Ray ray = new Ray(this.cameraPosition, rayDirection);
+      for (int i = 0; i < camera.width; i++) {
+        for (int j = 0; j < camera.height; j++) {
+          Vector3D rayToPanel = new Vector3D(i, j, focalDistance);
+          Vector3D rayDirection = camera.position.subtract(rayToPanel);
+          Ray ray = new Ray(camera.position, rayDirection);
           double t = obj.objectIsHit(ray);
-          if (t > 0) {
+          if (t >= 0) {
             // if ray from camera intersects object, color pixel
-            Vector3D normal = (ray.at(t).subtract(obj.position)).normalize();
-            double coeff = light.direction.dotProduct(normal);
-            coeff = (255*((coeff / 2.0) + 0.5));
-            g.setColor(new Color(255, 0, 0, (int)coeff));
+            // Vector3D normal = (ray.at(t).subtract(obj.position)).normalize();
+            // double coeff = light.direction.normalize().dotProduct(normal);
+            // coeff = (255*((coeff / 2.0) + 0.5));
+            // g.setColor(new Color(255, 0, 0, (int)coeff));
+            g.setColor(Color.RED);
             g.drawLine(i, j, i, j);
           } else {
             // else treat as background
-            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * (j / this.height))));
+            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * (j / camera.height))));
             g.drawLine(i, j, i, j);
           }
         }
