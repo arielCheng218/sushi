@@ -9,7 +9,6 @@ public class World extends JPanel {
 
   public ArrayList<Object> objects = new ArrayList<Object>();
   public int time;
-  private double focalDistance;
   private Camera camera;
 
   World(Camera camera) {
@@ -20,17 +19,18 @@ public class World extends JPanel {
     objects.add(obj);
   }
 
+  @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     this.setBackground(Color.BLACK);
     System.out.println("Drawing...");
-    Vector3D lightPosition = new Vector3D(1, 1, -1);
-    DirectionLight light = new DirectionLight(lightPosition);
+    // Vector3D lightPosition = new Vector3D(1, 1, -1);
+    // DirectionLight light = new DirectionLight(lightPosition);
     for (Object obj : objects) {
       System.out.println("Rendering " + obj + "...");
       for (int i = 0; i < camera.width; i++) {
         for (int j = 0; j < camera.height; j++) {
-          Vector3D rayToPanel = new Vector3D(i, j, focalDistance);
+          Vector3D rayToPanel = new Vector3D(i, j, camera.focalDistance);
           Vector3D rayDirection = camera.position.subtract(rayToPanel);
           Ray ray = new Ray(camera.position, rayDirection);
           double t = obj.objectIsHit(ray);
@@ -44,11 +44,13 @@ public class World extends JPanel {
             g.drawLine(i, j, i, j);
           } else {
             // else treat as background
-            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * (j / camera.height))));
+            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * j/camera.height)));
             g.drawLine(i, j, i, j);
           }
         }
       }
+      System.out.println(camera.position);
+      System.out.println(obj.position);
     }
     System.out.println("Finished drawing.");
   }

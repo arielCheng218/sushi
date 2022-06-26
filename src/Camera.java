@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.*;
-import java.awt.Dimension;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 
@@ -16,13 +16,16 @@ class Camera extends JPanel implements MouseMotionListener {
   JFrame frame = new JFrame("sushi 3D");
   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-  public double width = screenSize.getWidth();
-  public double height = screenSize.getHeight();
+  private World world;
+
+  public int width = (int)screenSize.getWidth();
+  public int height = (int)screenSize.getHeight();
   
   private double speed = 20.0;
+  private PointerInfo lastMousePosition;
 
-  public Vector3D position = new Vector3D(width / 2.0, height / 2.0, -1200);
-  public double focalDistance = 1.0;
+  public Vector3D position = new Vector3D(400+(width / 2.0), height / 2.0, -600);
+  public double focalDistance = 900.0;
 
   public void setup() {
     this.frame.setVisible(true);
@@ -33,27 +36,39 @@ class Camera extends JPanel implements MouseMotionListener {
 
   public static void main(String[] args) {
     Camera camera = new Camera();
-    World world = new World(camera);
-    camera.frame.add(world);
+    camera.world = new World(camera);
+    camera.frame.add(camera.world);
+
+    System.out.println(camera.height);
+    System.out.println(camera.width);
 
     // listen for mouse events and key presses
     camera.frame.addMouseMotionListener(camera);
-    camera.setupKeyBindings(world, camera);
+    camera.setupKeyBindings(camera.world, camera);
+
+    // set mouse position
+    camera.lastMousePosition = MouseInfo.getPointerInfo();
 
     // sphere
-    double sphereRadius = 200.0;
-    Vector3D sphereCenter = new Vector3D(80+(camera.width / 2.0), 80+(camera.height / 2.0), -1);
+    double sphereRadius = 80.0;
+    Vector3D sphereCenter = new Vector3D(camera.width / 2.0, camera.height / 2.0, -1);
     Sphere sphere = new Sphere(sphereRadius, sphereCenter);
-    world.addObject(sphere);
+    camera.world.addObject(sphere);
 
     camera.setup();
+  }
+
+  @Override
+  protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    world.repaint();
   }
 
   public void mouseDragged(MouseEvent event) {}
 
   public void mouseMoved(MouseEvent event) {
     // TODO rotate camera
-    // System.out.println("Mouse movement: " + event.getX()+ "," + event.getY() + ".");
+    System.out.println("Mouse movement: " + event.getX()+ "," + event.getY() + ".");
     // Rotate camera somehow
     // frame.repaint();
   }
@@ -81,8 +96,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      System.out.println("forward action");
-      camera.position = incVectorValue(2, speed, position);
+      camera.position = incVectorValue(2, speed, camera.position);
       camera.frame.repaint();
     }
   }
@@ -94,7 +108,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(2, -speed, position);
+      camera.position = incVectorValue(2, -speed, camera.position);
       camera.frame.repaint();
     }
   }
@@ -106,7 +120,8 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(0, speed, position);
+      System.out.println(camera.position);
+      camera.position = incVectorValue(0, -speed, camera.position);
       camera.frame.repaint();
     }
   }
@@ -118,7 +133,7 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.position = incVectorValue(0, ㄦspeed, position);
+      camera.position = incVectorValue(0, speed, camera.position);
       camera.frame.repaint();
     }
   }
