@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -15,11 +17,14 @@ public class World extends JPanel {
   public int time;
   private Camera camera;
 
+  private BufferedImage canvas;
+
   RealMatrix rotateZ;
   RealMatrix rotateY;
 
   World(Camera camera) {
     this.camera = camera;
+    this.canvas = new BufferedImage(this.camera.width, this.camera.height, BufferedImage.TYPE_INT_ARGB);
   }
 
   public void addObject(Object obj) {
@@ -49,22 +54,26 @@ public class World extends JPanel {
     return null;
   }
 
+  private void fillCanvas(Color c) {
+    for (int x = 0; x < this.camera.width; x++) {
+      for (int y = 0; y < this.camera.height; y++) {
+        this.canvas.setRGB(x, y, c.getRGB());
+      }
+    }
+  }
+
   @Override
   public void paintComponent(Graphics g) {
 
     super.paintComponent(g);
-    this.setBackground(Color.BLACK);
 
     // lights
-    Vector3D lightDirection = new Vector3D(camera.width / 2.0, camera.height / 2.0 + 83.0, -1);
+    Vector3D lightDirection = new Vector3D(camera.width / 2.0, camera.height / 2.0 + 40.0, -1);
     DirectionLight light = new DirectionLight(lightDirection);
 
     // get rotation matrices 
     rotateZ = getRotationMatrix('z', camera.thetaY);
     rotateY = getRotationMatrix('y', camera.thetaZ);
-    
-    // System.out.println(camera.thetaY);
-    // System.out.println(camera.thetaZ);
     
     for (Object obj : objects) {
       for (int i = 0; i < camera.width; i++) {
@@ -76,11 +85,11 @@ public class World extends JPanel {
           rayToPlane = rotateZ.operate(rayToPlane);
           rayToPlane = rotateY.operate(rayToPlane);
 
-          Vector3D vectorToPlane = new Vector3D(rayToPlane.getEntry(0), rayToPlane.getEntry(1), rayToPlane.getEntry(2));
-          vectorToPlane = camera.position.subtract(vectorToPlane);
+          Vector3D cameraToPlane = new Vector3D(rayToPlane.getEntry(0), rayToPlane.getEntry(1), rayToPlane.getEntry(2));
+          cameraToPlane = camera.position.subtract(cameraToPlane);
 
           // Ray object intersection
-          Ray ray = new Ray(camera.position, vectorToPlane);
+          Ray ray = new Ray(camera.position, cameraToPlane);
           double t = obj.objectIsHit(ray);
 
           if (t >= 0) {
@@ -89,16 +98,17 @@ public class World extends JPanel {
             double coeff = light.direction.normalize().dotProduct(normal);
             coeff = (255*((coeff / 2.0) + 0.5));
             // TODO read color from object
-            g.setColor(new Color(255, 0, 0, (int)coeff));
-            g.setColor(Color.RED);
-            g.drawLine(i, j, i, j);
+            // TODO java HSV transform
+            Color color = new Color(255, 0, 0, (int)coeff);
+            this.canvas.setRGB(i, j, color.getRGB());
           } else {
             // else treat as background
-            g.setColor(new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * j/camera.height)));
-            g.drawLine(i, j, i, j);
+           Color color = new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * j/camera.height));
+            this.canvas.setRGB(i, j, color.getRGB());
           }
         }
       }
     }
+    g.drawImage(this.canvas, 0, 0, null);
   }
 }

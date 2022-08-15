@@ -1,6 +1,7 @@
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import java.awt.image.BufferedImage;
 import javax.swing.KeyStroke;
 import javax.swing.RepaintManager;
 
@@ -24,8 +25,7 @@ class Camera extends JPanel implements MouseMotionListener {
   public int width = (int)screenSize.getWidth();
   public int height = (int)screenSize.getHeight();
   
-  private PointerInfo lastMousePosition;
-  public boolean lockMouse = true;
+  public boolean mouseInvisible = true;
   Robot robot;
 
   Duration deltaTime;
@@ -37,12 +37,13 @@ class Camera extends JPanel implements MouseMotionListener {
   public double focalDistance = 900.0;
 
   public void setup() {
-    // this.frame.setCursor(this.frame.getToolkit().createCustomCursor(new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "null"));
-    // System.setProperty("apple.awt.fullscreenhidecursor","true");
+    // Hide cursor
+    this.frame.setCursor(this.frame.getToolkit().createCustomCursor(new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "null"));
+    System.setProperty("apple.awt.fullscreenhidecursor","true");
+    // Set properties
     this.frame.setVisible(true);
     this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
     this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    RepaintManager.currentManager(this.world).markCompletelyClean(this.world);
   }
 
   public void loop() {
@@ -64,9 +65,6 @@ class Camera extends JPanel implements MouseMotionListener {
     camera.frame.addMouseMotionListener(camera);
     camera.setupKeyBindings(camera.world, camera);
 
-    // set mouse position
-    camera.lastMousePosition = MouseInfo.getPointerInfo();
-
     // sphere
     double sphereRadius = 80.0;
     Vector3D sphereCenter = new Vector3D(camera.width / 2.0, camera.height / 2.0, -1);
@@ -80,24 +78,21 @@ class Camera extends JPanel implements MouseMotionListener {
   }
 
   // Mouse handlers
-
   public void mouseDragged(MouseEvent event) {}
 
-  // TODO fix weird rotation bug
   public void mouseMoved(MouseEvent event) {
-    double deltaX = this.lastMousePosition.getLocation().getX() - event.getX();
-    double deltaY = this.lastMousePosition.getLocation().getY() - event.getY();
-    thetaZ += deltaX / this.focalDistance;
-    thetaY += deltaY / this.focalDistance;
-    System.out.println(this.thetaY);
-    System.out.println(this.thetaZ);
-    lastMousePosition = MouseInfo.getPointerInfo();
-    this.setMousePosition();
+    if (this.mouseInvisible) {
+      double deltaX = this.width / 2 - event.getXOnScreen();
+      double deltaY = this.height / 2 - event.getYOnScreen();
+      thetaZ += deltaX / (2 * Math.PI * this.focalDistance);
+      thetaY += deltaY / (2 * Math.PI * this.focalDistance);
+      this.setMousePosition();
+    }
   }
 
   public void setMousePosition() {
     // User has not escaped, return mouse to center of screen
-    if (this.lockMouse) {
+    if (this.mouseInvisible) {
       try {
         robot = new Robot();
         robot.mouseMove(this.width / 2, this.height / 2);
@@ -184,11 +179,13 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      camera.lockMouse = false;
+      // Close window
+      System.exit(0);
     }
   }
 
   // Utils
+
   private Vector3D incVectorValue(int index, double increment, Vector3D vector) {
     if (index == 0) {
       return new Vector3D(vector.getX() + increment, vector.getY(), vector.getZ());
@@ -199,4 +196,5 @@ class Camera extends JPanel implements MouseMotionListener {
     }
     return null;
   }
+
 }
