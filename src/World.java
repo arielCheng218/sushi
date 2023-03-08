@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.Color;
@@ -8,8 +10,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.RealVectorChangingVisitor;
 
+// TODO implement spatial partitioning
+// TODO implement bounding volume hierachy
+// TODO refractive and reflective materials
 
 public class World extends JPanel {
 
@@ -54,10 +58,11 @@ public class World extends JPanel {
     return null;
   }
 
-  private void fillCanvas(Color c) {
-    for (int x = 0; x < this.camera.width; x++) {
-      for (int y = 0; y < this.camera.height; y++) {
-        this.canvas.setRGB(x, y, c.getRGB());
+  private void paintBackground() {
+    for (int i = 0; i < camera.width; i++) {
+      for (int j = 0; j < camera.height; j++) {
+        Color color = new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * j / camera.height));
+        this.canvas.setRGB(i, j, color.getRGB());
       }
     }
   }
@@ -68,16 +73,22 @@ public class World extends JPanel {
     super.paintComponent(g);
 
     // lights
-    Vector3D lightDirection = new Vector3D(camera.width / 2.0, camera.height / 2.0 + 40.0, -1);
+    Vector3D lightDirection = new Vector3D(0, -1, -0.78).normalize();
     DirectionLight light = new DirectionLight(lightDirection);
 
     // get rotation matrices 
     rotateZ = getRotationMatrix('z', camera.thetaY);
     rotateY = getRotationMatrix('y', camera.thetaZ);
+
+    paintBackground();
+
+    // TODO add z buffer
     
     for (Object obj : objects) {
       for (int i = 0; i < camera.width; i++) {
         for (int j = 0; j < camera.height; j++) {
+
+          // System.out.println(obj);
 
           RealVector rayToPlane = MatrixUtils.createRealVector(new double[] {i, j, camera.focalDistance});
 
@@ -94,18 +105,20 @@ public class World extends JPanel {
 
           if (t >= 0) {
             // if ray from camera intersects object, color pixel
-            Vector3D normal = (ray.at(t).subtract(obj.position)).normalize();
-            double coeff = light.direction.normalize().dotProduct(normal);
-            coeff = (255*((coeff / 2.0) + 0.5));
+            Vector3D normal = (obj.position.subtract(ray.at(t))).normalize();
+            double coeff = -light.direction.dotProduct(normal);
+            coeff = (coeff + 1) / 2; // make sure coefficient is between 0 and 1
+            System.out.println((int)(200*coeff));
+            System.out.println((int)(10*coeff));
+            System.out.println((int)(10*coeff));
             // TODO read color from object
             // TODO java HSV transform
-            Color color = new Color(255, 0, 0, (int)coeff);
-            this.canvas.setRGB(i, j, color.getRGB());
-          } else {
-            // else treat as background
-           Color color = new Color(Color.BLUE.getRed(), Color.BLUE.getGreen(), Color.BLUE.getBlue(), 255 - (int)(255 * j/camera.height));
-            this.canvas.setRGB(i, j, color.getRGB());
-          }
+						// System.out.println((float)coeff);
+            Color objectColor = new Color((int)(200*coeff), (int)(10*coeff), (int)(10*coeff));
+            // Debug surface normals
+            // Color objectColor = new Color((int)(255*((normal.getX() + 1)/2)), (int)(255*((normal.getY() + 1)/2)), (int)(255*((normal.getZ() + 1)/2)));
+            this.canvas.setRGB(i, j, objectColor.getRGB());
+          } 
         }
       }
     }

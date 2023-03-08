@@ -17,6 +17,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 class Camera extends JPanel implements MouseMotionListener {
 
+  // PROPERTIES OF CAMERA
   JFrame frame = new JFrame("sushi 3D");
   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -24,9 +25,6 @@ class Camera extends JPanel implements MouseMotionListener {
 
   public int width = (int)screenSize.getWidth();
   public int height = (int)screenSize.getHeight();
-  
-  public boolean mouseInvisible = true;
-  Robot robot;
 
   Duration deltaTime;
 
@@ -35,6 +33,10 @@ class Camera extends JPanel implements MouseMotionListener {
   public double thetaZ = 0;
   public double thetaY = 0;
   public double focalDistance = 900.0;
+
+  // OTHER
+  public boolean mouseInvisible = true;
+  Robot robot;
 
   public void setup() {
     // Hide cursor
@@ -65,11 +67,27 @@ class Camera extends JPanel implements MouseMotionListener {
     camera.frame.addMouseMotionListener(camera);
     camera.setupKeyBindings(camera.world, camera);
 
-    // sphere
-    double sphereRadius = 80.0;
-    Vector3D sphereCenter = new Vector3D(camera.width / 2.0, camera.height / 2.0, -1);
-    Sphere sphere = new Sphere(sphereRadius, sphereCenter);
-    camera.world.addObject(sphere);
+    // colors
+    Integer[] redRGB = {255, 0, 0};
+    Integer[] greenRGB = {0, 255, 0};
+
+    // sphere 3
+    double sphereRadius_3 = 4000.0;
+    Vector3D sphereCenter_3 = new Vector3D(camera.width / 2.0, (camera.height / 2.0)+4000, -90);
+    Sphere sphere3 = new Sphere(sphereRadius_3, greenRGB, sphereCenter_3);
+    camera.world.addObject(sphere3);
+
+    // sphere 1
+    double sphereRadius_1 = 20.0;
+    Vector3D sphereCenter_1 = new Vector3D(camera.width / 2.0, camera.height / 2.0, -90);
+    Sphere sphere1 = new Sphere(sphereRadius_1, redRGB, sphereCenter_1);
+    camera.world.addObject(sphere1);
+
+    // sphere 2
+    double sphereRadius_2 = 40.0;
+    Vector3D sphereCenter_2 = new Vector3D(camera.width / 2.0 + 80.0, camera.height / 2.0, -90);
+    Sphere sphere2 = new Sphere(sphereRadius_2, redRGB, sphereCenter_2);
+    camera.world.addObject(sphere2);
 
     camera.setup();
 
@@ -185,7 +203,6 @@ class Camera extends JPanel implements MouseMotionListener {
   }
 
   // Utils
-
   private Vector3D incVectorValue(int index, double increment, Vector3D vector) {
     if (index == 0) {
       return new Vector3D(vector.getX() + increment, vector.getY(), vector.getZ());
