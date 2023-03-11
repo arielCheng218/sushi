@@ -68,26 +68,28 @@ class Camera extends JPanel implements MouseMotionListener {
     camera.setupKeyBindings(camera.world, camera);
 
     // colors
-    Integer[] redRGB = {255, 0, 0};
-    Integer[] greenRGB = {0, 255, 0};
+    float[] redRGB = {(float)0.9, 0, 0};
+    float[] greenRGB = {(float)0.039, (float)0.196, (float)0.1255};
 
     // sphere 3
     double sphereRadius_3 = 4000.0;
-    Vector3D sphereCenter_3 = new Vector3D(camera.width / 2.0, (camera.height / 2.0)+4000, -90);
+    Vector3D sphereCenter_3 = new Vector3D(camera.width / 2.0, (camera.height / 2.0)+4000, 90);
     Sphere sphere3 = new Sphere(sphereRadius_3, greenRGB, sphereCenter_3);
     camera.world.addObject(sphere3);
+    System.out.println(sphere3);
 
     // sphere 1
-    double sphereRadius_1 = 20.0;
-    Vector3D sphereCenter_1 = new Vector3D(camera.width / 2.0, camera.height / 2.0, -90);
+    double sphereRadius_1 = 40.0;
+    Vector3D sphereCenter_1 = new Vector3D(camera.width / 2.0, camera.height / 2.0, 90);
     Sphere sphere1 = new Sphere(sphereRadius_1, redRGB, sphereCenter_1);
     camera.world.addObject(sphere1);
+    System.out.println(sphere1);
 
-    // sphere 2
-    double sphereRadius_2 = 40.0;
-    Vector3D sphereCenter_2 = new Vector3D(camera.width / 2.0 + 80.0, camera.height / 2.0, -90);
-    Sphere sphere2 = new Sphere(sphereRadius_2, redRGB, sphereCenter_2);
-    camera.world.addObject(sphere2);
+    // // sphere 2
+    // double sphereRadius_2 = 40.0;
+    // Vector3D sphereCenter_2 = new Vector3D(camera.width / 2.0 + 80.0, camera.height / 2.0, -90);
+    // Sphere sphere2 = new Sphere(sphereRadius_2, redRGB, sphereCenter_2);
+    // camera.world.addObject(sphere2);
 
     camera.setup();
 

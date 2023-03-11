@@ -13,5 +13,5 @@ public class Object {
 
   public double objectIsHit(Ray ray) { return -1.0; }
 
-  public Integer[] getColor() { return null; }
+  public float[] getColor() { return null; }
 }

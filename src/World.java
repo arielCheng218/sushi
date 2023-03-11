@@ -72,9 +72,12 @@ public class World extends JPanel {
 
     super.paintComponent(g);
 
-    // lights
-    Vector3D lightDirection = new Vector3D(0, -1, -0.78).normalize();
-    DirectionLight light = new DirectionLight(lightDirection);
+    // direction light
+    Vector3D lightDirection = new Vector3D(0.5, 0.4, 0).normalize();
+    DirectionLight directionLight = new DirectionLight(lightDirection);
+    // point light
+    Vector3D lightOrigin = new Vector3D((camera.width / 2.0)-40, (camera.height / 2.0)+80, -70);
+    PointLight pointLight = new PointLight(lightOrigin);
 
     // get rotation matrices 
     rotateZ = getRotationMatrix('z', camera.thetaY);
@@ -84,12 +87,13 @@ public class World extends JPanel {
 
     // TODO add z buffer
     
-    for (Object obj : objects) {
+    for (int objectIndex = 0; objectIndex < objects.size(); objectIndex++) {
       for (int i = 0; i < camera.width; i++) {
         for (int j = 0; j < camera.height; j++) {
 
-          // System.out.println(obj);
-
+          Color objectColor;
+          Object obj = objects.get(objectIndex);
+          
           RealVector rayToPlane = MatrixUtils.createRealVector(new double[] {i, j, camera.focalDistance});
 
           // rotate ray to plane by camera.thetaZ and camera.thetaY
@@ -99,26 +103,38 @@ public class World extends JPanel {
           Vector3D cameraToPlane = new Vector3D(rayToPlane.getEntry(0), rayToPlane.getEntry(1), rayToPlane.getEntry(2));
           cameraToPlane = camera.position.subtract(cameraToPlane);
 
+          // Color pixel if it's part of an object
+
           // Ray object intersection
           Ray ray = new Ray(camera.position, cameraToPlane);
           double t = obj.objectIsHit(ray);
 
           if (t >= 0) {
-            // if ray from camera intersects object, color pixel
-            Vector3D normal = (obj.position.subtract(ray.at(t))).normalize();
-            double coeff = -light.direction.dotProduct(normal);
+            // Color objects
+            Vector3D normal = (ray.at(t).subtract(obj.position)).normalize();
+            double coeff = -directionLight.direction.dotProduct(normal);
             coeff = (coeff + 1) / 2; // make sure coefficient is between 0 and 1
-            System.out.println((int)(200*coeff));
-            System.out.println((int)(10*coeff));
-            System.out.println((int)(10*coeff));
-            // TODO read color from object
-            // TODO java HSV transform
-						// System.out.println((float)coeff);
-            Color objectColor = new Color((int)(200*coeff), (int)(10*coeff), (int)(10*coeff));
-            // Debug surface normals
-            // Color objectColor = new Color((int)(255*((normal.getX() + 1)/2)), (int)(255*((normal.getY() + 1)/2)), (int)(255*((normal.getZ() + 1)/2)));
+            objectColor = new Color((float)obj.getColor()[0], (float)obj.getColor()[1], ((float)obj.getColor()[2]), (float)(coeff));
             this.canvas.setRGB(i, j, objectColor.getRGB());
-          } 
+
+            // FIXME is the hitpoint from the camera or from the origin
+
+            // Color pixel if it's a shadow
+            for (int shadowObjectIndex = 0; shadowObjectIndex < objects.size(); shadowObjectIndex++) {
+              if (shadowObjectIndex != objectIndex) {
+                Vector3D pHit = ray.at(t);
+                Vector3D pHitToPointLight = pointLight.origin.subtract(pHit);
+                double shadowRayIntersectObject = objects.get(shadowObjectIndex).objectIsHit(new Ray(pHit, pHitToPointLight)); 
+                // if a ray from the hit point to the light source intersects an object, the light is blocked so there's a shadow
+                if (shadowRayIntersectObject >= 0) {
+                  objectColor = new Color(0, 0, 0);
+                  this.canvas.setRGB(i, j, objectColor.getRGB());
+                  break;
+                };
+              }
+            }
+          }
+          
         }
       }
     }
